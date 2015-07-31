@@ -14,9 +14,10 @@ import struct
 import os
 import re
 import logging
+import time
 
 VIDPIDS = [
-    (0x0c45L, 0x7401L),
+    (0x0c45, 0x7401),
 ]
 REQ_INT_LEN = 8
 ENDPOINT = 0x82
@@ -135,6 +136,7 @@ class TemperDevice(object):
         """
         try:
             # Take control of device if required
+            print(self._device.is_kernel_driver_active)
             if self._device.is_kernel_driver_active:
                 LOGGER.debug('Taking control of device on bus {0} ports '
                     '{1}'.format(self._bus, self._ports))
@@ -149,6 +151,7 @@ class TemperDevice(object):
                     timeout=TIMEOUT)
             # Get temperature
             self._control_transfer(COMMANDS['temp'])
+            #time.sleep(99)
             self._interrupt_read()
             self._control_transfer(COMMANDS['ini1'])
             self._interrupt_read()
@@ -185,7 +188,7 @@ class TemperDevice(object):
         Send device a control request with standard parameters and <data> as
         payload.
         """
-        LOGGER.debug('Ctrl transfer: {0}'.format(data))
+        print('Ctrl transfer: {0}'.format(data))
         self._device.ctrl_transfer(bmRequestType=0x21, bRequest=0x09,
             wValue=0x0200, wIndex=0x01, data_or_wLength=data, timeout=TIMEOUT)
 
@@ -193,8 +196,8 @@ class TemperDevice(object):
         """
         Read data from device.
         """
-        data = self._device.read(ENDPOINT, REQ_INT_LEN, interface=INTERFACE, timeout=TIMEOUT)
-        LOGGER.debug('Read data: {0}'.format(data))
+        data = self._device.read(ENDPOINT, REQ_INT_LEN, timeout=TIMEOUT)
+        print('Read data: {0}'.format(data))
         return data
 
 
@@ -208,7 +211,7 @@ class TemperHandler(object):
         for vid, pid in VIDPIDS:
             self._devices += [TemperDevice(device) for device in \
                 usb.core.find(find_all=True, idVendor=vid, idProduct=pid)]
-	LOGGER.info('Found {0} TEMPer devices'.format(len(self._devices)))
+        LOGGER.info('Found {0} TEMPer devices'.format(len(self._devices)))
 
     def get_devices(self):
         """
