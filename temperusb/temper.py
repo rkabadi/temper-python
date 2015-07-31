@@ -14,7 +14,6 @@ import struct
 import os
 import re
 import logging
-import time
 
 VIDPIDS = [
     (0x0c45, 0x7401),
@@ -29,9 +28,9 @@ CALIB_LINE_STR = USB_PORTS_STR +\
     '\s*:\s*scale\s*=\s*([+|-]?\d*\.\d+)\s*,\s*offset\s*=\s*([+|-]?\d*\.\d+)'
 USB_SYS_PREFIX = '/sys/bus/usb/devices/'
 COMMANDS = {
-    'temp': '\x01\x80\x33\x01\x00\x00\x00\x00',
-    'ini1': '\x01\x82\x77\x01\x00\x00\x00\x00',
-    'ini2': '\x01\x86\xff\x01\x00\x00\x00\x00',
+    'temp': (0x01,0x80,0x33,0x01,0x00,0x00,0x00,0x00),
+    'ini1': (0x01,0x82,0x77,0x01,0x00,0x00,0x00,0x00),
+    'ini2': (0x01,0x86,0xFF,0x01,0x00,0x00,0x00,0x00)
 }
 LOGGER = logging.getLogger(__name__)
 
@@ -136,7 +135,6 @@ class TemperDevice(object):
         """
         try:
             # Take control of device if required
-            print(self._device.is_kernel_driver_active)
             if self._device.is_kernel_driver_active:
                 LOGGER.debug('Taking control of device on bus {0} ports '
                     '{1}'.format(self._bus, self._ports))
@@ -172,7 +170,7 @@ class TemperDevice(object):
                 raise
         # Interpret device response
         data_s = "".join([chr(byte) for byte in data])
-        temp_c = 125.0/32000.0*(struct.unpack('>h', data_s[2:4])[0])
+        temp_c = 125.0/32000.0*(struct.unpack('>h', data[2:4])[0])
         temp_c = temp_c * self._scale + self._offset
         if format == 'celsius':
             return temp_c
@@ -188,7 +186,7 @@ class TemperDevice(object):
         Send device a control request with standard parameters and <data> as
         payload.
         """
-        print('Ctrl transfer: {0}'.format(data))
+        LOGGER.debug('Ctrl transfer: {0}'.format(data))
         self._device.ctrl_transfer(bmRequestType=0x21, bRequest=0x09,
             wValue=0x0200, wIndex=0x01, data_or_wLength=data, timeout=TIMEOUT)
 
@@ -197,7 +195,7 @@ class TemperDevice(object):
         Read data from device.
         """
         data = self._device.read(ENDPOINT, REQ_INT_LEN, timeout=TIMEOUT)
-        print('Read data: {0}'.format(data))
+        LOGGER.debug('Read data: {0}'.format(data))
         return data
 
 
