@@ -194,7 +194,7 @@ class TemperDevice(object):
         """
         Read data from device.
         """
-        data = self._device.read(ENDPOINT, REQ_INT_LEN, timeout=TIMEOUT)
+        data = self._device.read(ENDPOINT, REQ_INT_LEN, interface=INTERFACE, timeout=TIMEOUT)
         LOGGER.debug('Read data: {0}'.format(data))
         return data
 
