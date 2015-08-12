@@ -193,6 +193,7 @@ class TemperDevice(object):
         payload.
         """
         LOGGER.debug('Ctrl transfer: {0}'.format(data))
+        print(data)
         self._device.ctrl_transfer(bmRequestType=0x21, bRequest=0x09,
             wValue=0x0200, wIndex=0x01, data_or_wLength=data, timeout=TIMEOUT)
 
