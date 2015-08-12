@@ -28,7 +28,7 @@ USB_PORTS_STR = '^\s*(\d+)-(\d+(?:\.\d+)*)'
 CALIB_LINE_STR = USB_PORTS_STR +\
     '\s*:\s*scale\s*=\s*([+|-]?\d*\.\d+)\s*,\s*offset\s*=\s*([+|-]?\d*\.\d+)'
 
-if 'FREEBSD' in platform.system():
+if 'FREEBSD' in platform.platform().upper():
     USB_SYS_PREFIX = '/dev/usb/'
 else:
     USB_SYS_PREFIX = '/sys/bus/usb/devices/'
