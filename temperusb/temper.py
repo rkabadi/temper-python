@@ -14,6 +14,7 @@ import struct
 import os
 import re
 import logging
+import platform
 
 VIDPIDS = [
     (0x0c45, 0x7401),
@@ -26,7 +27,12 @@ TIMEOUT = 5000
 USB_PORTS_STR = '^\s*(\d+)-(\d+(?:\.\d+)*)'
 CALIB_LINE_STR = USB_PORTS_STR +\
     '\s*:\s*scale\s*=\s*([+|-]?\d*\.\d+)\s*,\s*offset\s*=\s*([+|-]?\d*\.\d+)'
-USB_SYS_PREFIX = '/sys/bus/usb/devices/'
+
+if 'FREEBSD' in platform.system():
+    USB_SYS_PREFIX = '/dev/usb/'
+else:
+    USB_SYS_PREFIX = '/sys/bus/usb/devices/'
+
 COMMANDS = {
     'temp': (0x01,0x80,0x33,0x01,0x00,0x00,0x00,0x00),
     'ini1': (0x01,0x82,0x77,0x01,0x00,0x00,0x00,0x00),
